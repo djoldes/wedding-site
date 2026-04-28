@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panou organizatori - Nunta</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Panou organizatori</h1>
+        <p class="subtitle">Zona separată pentru administrare și extinderi ulterioare</p>
+
+        <div class="organizer-grid">
+            <div class="stat-card">
+                <div class="stat-label">Invitați total</div>
+                <div class="stat-value" id="totalGuests">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Mese folosite</div>
+                <div class="stat-value" id="totalTables">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cea mai mare masă</div>
+                <div class="stat-value" id="largestTable">0</div>
+            </div>
+        </div>
+
+        <div class="section-block">
+            <h2 class="section-title">Ce poți adăuga aici mai târziu</h2>
+            <p class="section-text" id="organizerDescription"></p>
+            <ul class="section-text" id="organizerNotes"></ul>
+        </div>
+
+        <div class="section-block">
+            <h2 class="section-title">Distribuția pe mese</h2>
+            <div class="table-list" id="tableList"></div>
+        </div>
+
+        <div class="page-link-row">
+            <a class="page-link" href="index.html">Înapoi la pagina publică</a>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="organizers.js"></script>
+</body>
+</html>

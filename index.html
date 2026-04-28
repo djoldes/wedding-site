@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Găsește-ți masa - Nunta</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>David & Salomeea</h1>
+        
+        <div class="main-tabs">
+            <div class="main-tabs__header">
+                <button type="button" class="main-tab-button" data-tab="program">
+                    <span>📅 Program</span>
+                </button>
+                <button type="button" class="main-tab-button" data-tab="menu">
+                    <span>🍽️ Meniu</span>
+                </button>
+                <button type="button" class="main-tab-button" data-tab="gallery">
+                    <span>📸 Galerie</span>
+                </button>
+                <button type="button" class="main-tab-button is-active" data-tab="search">
+                    <span>🔍 Locul tău</span>
+                </button>
+            </div>
+
+            <div class="main-tabs__content">
+                <!-- Tab: Program -->
+                <div class="main-tab-pane" data-tab="program">
+                    <h2>📅 Programul Serii</h2>
+                    <div id="programContent"></div>
+                </div>
+
+                <!-- Tab: Meniu -->
+                <div class="main-tab-pane" data-tab="menu">
+                    <h2>🍽️ Meniul Nuntii</h2>
+                    <div id="menuContent"></div>
+                </div>
+
+                <!-- Tab: Gallery -->
+                <div class="main-tab-pane" data-tab="gallery">
+                    <h2>📸 Album foto partajat</h2>
+                    
+                    <!-- Google Photos Section -->
+                    <div class="google-photos-section">
+                        <h3 class="google-photos-section__title">📤 Deschide albumul</h3>
+                        <p class="google-photos-section__text">Albumul este pe Google Photos. Din site îl poți deschide rapid, fără embed sau backend.</p>
+                        
+                        <div class="google-photos-buttons">
+                            <a 
+                                href="https://photos.app.goo.gl/R1BEM7ZYHjm3jUN48" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                class="google-photos-link-btn"
+                            >
+                                🔗 Deschide Albumul
+                            </a>
+                        </div>
+                        
+                        <p class="google-photos-section__hint">
+                            Google Photos nu permite embed fiabil în toate browserele, așa că deschiderea directă e varianta stabilă.
+                        </p>
+                    </div>
+
+                    <!-- Filters (optional) -->
+                    <div class="gallery-categories" style="display: none;">
+                        <button type="button" class="gallery-cat-button is-active" data-category="all">
+                            Toate (0)
+                        </button>
+                        <button type="button" class="gallery-cat-button" data-category="pregătiri">
+                            Pregătiri (0)
+                        </button>
+                        <button type="button" class="gallery-cat-button" data-category="ceremonie">
+                            Ceremonie (0)
+                        </button>
+                        <button type="button" class="gallery-cat-button" data-category="petrecere">
+                            Petrecere (0)
+                        </button>
+                        <button type="button" class="gallery-cat-button" data-category="detalii">
+                            Detalii (0)
+                        </button>
+                    </div>
+
+                    <!-- Gallery Grid (optional) -->
+                    <div class="gallery-grid" id="galleryGrid" style="display: none;"></div>
+                </div>
+
+                <!-- Tab: Search -->
+                <div class="main-tab-pane is-active" data-tab="search">
+                    <h2>Unde sezi tu?</h2>
+                    <p class="subtitle">Introdu-ți numele pentru a afla la ce masă ești</p>
+
+                    <div class="search-box">
+                        <input 
+                            type="text" 
+                            id="nameInput" 
+                            placeholder="Introdu-ți numele..."
+                            autocomplete="off"
+                        >
+                        <div class="search-actions">
+                            <button type="button" id="searchButton">Caută</button>
+                            <button type="button" id="resetButton" class="secondary">Reset</button>
+                        </div>
+                        <div class="suggestions" id="suggestions" aria-live="polite"></div>
+                    </div>
+
+                    <div class="result" id="result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-link-row">
+            <a class="page-link" href="organizers.html">Panou organizatori</a>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox__overlay" id="lightboxOverlay"></div>
+        <div class="lightbox__content">
+            <button type="button" class="lightbox__close" id="lightboxClose">✕</button>
+            <button type="button" class="lightbox__nav lightbox__nav--prev" id="lightboxPrev">❮</button>
+            <img class="lightbox__image" id="lightboxImage" src="" alt="Imagine galerie">
+            <button type="button" class="lightbox__nav lightbox__nav--next" id="lightboxNext">❯</button>
+            <div class="lightbox__caption" id="lightboxCaption"></div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
