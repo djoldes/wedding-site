@@ -64,27 +64,17 @@
                         </p>
                     </div>
 
-                    <!-- Filters (optional) -->
-                    <div class="gallery-categories" style="display: none;">
-                        <button type="button" class="gallery-cat-button is-active" data-category="all">
-                            Toate (0)
-                        </button>
-                        <button type="button" class="gallery-cat-button" data-category="pregătiri">
-                            Pregătiri (0)
-                        </button>
-                        <button type="button" class="gallery-cat-button" data-category="ceremonie">
-                            Ceremonie (0)
-                        </button>
-                        <button type="button" class="gallery-cat-button" data-category="petrecere">
-                            Petrecere (0)
-                        </button>
-                        <button type="button" class="gallery-cat-button" data-category="detalii">
-                            Detalii (0)
-                        </button>
+                    <!-- Upload UI (Cloudinary) -->
+                    <div class="upload-section">
+                        <h3>Încarcă poză din telefon / cameră</h3>
+                        <p class="upload-hint">Poți folosi camera mobilă sau alege o poză din galerie.</p>
+                        <div class="upload-controls">
+                            <input type="file" id="file" accept="image/*" capture="environment">
+                            <button type="button" id="uploadButton">Încarcă</button>
+                        </div>
+                        <div id="uploadStatus" aria-live="polite"></div>
                     </div>
 
-                    <!-- Gallery Grid (optional) -->
-                    <div class="gallery-grid" id="galleryGrid" style="display: none;"></div>
                 </div>
 
                 <!-- Tab: Search -->
@@ -111,9 +101,6 @@
             </div>
         </div>
 
-        <div class="page-link-row">
-            <a class="page-link" href="organizers.html">Panou organizatori</a>
-        </div>
     </div>
 
     <!-- Lightbox Modal -->
@@ -128,7 +115,66 @@
         </div>
     </div>
 
+    <script src="guests-data.js"></script>
     <script src="data.js"></script>
     <script src="script.js"></script>
+    <script type="module">
+        const cloudName = 'dr8ffdohg';
+        const uploadPreset = 'wedding';
+        const galleryTag = 'wedding-live';
+        const uploadEndpoint = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+
+        async function uploadToCloudinary(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', uploadPreset);
+            formData.append('tags', galleryTag);
+
+            const response = await fetch(uploadEndpoint, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Upload failed');
+            }
+
+            return response.json();
+        }
+
+        async function doUpload(file) {
+            const uploadStatus = document.getElementById('uploadStatus');
+            const uploadButton = document.getElementById('uploadButton');
+
+            try {
+                uploadButton.disabled = true;
+                uploadStatus.textContent = 'Încarcare...';
+
+                await uploadToCloudinary(file);
+
+                uploadStatus.textContent = 'Încărcare reușită!';
+            } catch (err) {
+                console.error(err);
+                uploadStatus.textContent = 'Eroare la încărcare';
+            } finally {
+                uploadButton.disabled = false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadButton = document.getElementById('uploadButton');
+            const fileInput = document.getElementById('file');
+
+            uploadButton.addEventListener('click', async () => {
+                const file = fileInput.files[0];
+                if (!file) {
+                    alert('Alege o imagine sau folosește camera.');
+                    return;
+                }
+                await doUpload(file);
+            });
+        });
+    </script>
 </body>
 </html>

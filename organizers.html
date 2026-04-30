@@ -8,40 +8,113 @@
 </head>
 <body>
     <div class="container">
-        <h1>📋 Panou organizatori</h1>
-        <p class="subtitle">Zona separată pentru administrare și extinderi ulterioare</p>
+        <div class="admin-gate" id="adminGate">
+            <h1>🔐 Acces administrativ</h1>
+            <p class="subtitle">Introdu codul de admin pentru a deschide panoul organizatorilor</p>
 
-        <div class="organizer-grid">
-            <div class="stat-card">
-                <div class="stat-label">Invitați total</div>
-                <div class="stat-value" id="totalGuests">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Mese folosite</div>
-                <div class="stat-value" id="totalTables">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Cea mai mare masă</div>
-                <div class="stat-value" id="largestTable">0</div>
-            </div>
+            <form class="admin-gate__form" id="adminLoginForm">
+                <input
+                    type="password"
+                    id="adminCodeInput"
+                    class="admin-gate__input"
+                    placeholder="Cod admin"
+                    autocomplete="current-password"
+                >
+                <button type="submit">Deschide panoul</button>
+                <div class="admin-gate__message" id="adminGateMessage" aria-live="polite"></div>
+            </form>
         </div>
 
-        <div class="section-block">
-            <h2 class="section-title">Ce poți adăuga aici mai târziu</h2>
-            <p class="section-text" id="organizerDescription"></p>
-            <ul class="section-text" id="organizerNotes"></ul>
-        </div>
+        <div class="admin-panel" id="adminPanel" hidden>
+            <h1>📋 Panou organizatori</h1>
+            <p class="subtitle">Zona separată pentru administrare și extinderi ulterioare</p>
 
-        <div class="section-block">
-            <h2 class="section-title">Distribuția pe mese</h2>
-            <div class="table-list" id="tableList"></div>
-        </div>
+            <div class="organizer-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Invitați total</div>
+                    <div class="stat-value" id="totalGuests">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Mese folosite</div>
+                    <div class="stat-value" id="totalTables">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Cea mai mare masă</div>
+                    <div class="stat-value" id="largestTable">0</div>
+                </div>
+            </div>
 
-        <div class="page-link-row">
-            <a class="page-link" href="index.html">Înapoi la pagina publică</a>
+            <div class="admin-tabs">
+                <div class="admin-tabs__header">
+                    <button type="button" class="admin-tab-button is-active" data-admin-tab="search">🔍 Căutare</button>
+                    <button type="button" class="admin-tab-button" data-admin-tab="add-guest">➕ Invitat</button>
+                    <button type="button" class="admin-tab-button" data-admin-tab="tables">🪑 Mese</button>
+                </div>
+
+                <div class="admin-tabs__content">
+                    <div class="admin-tab-pane is-active" data-admin-tab="search">
+                        <div class="section-block">
+                            <h2 class="section-title">Căutare invitat</h2>
+                            <p class="section-text">Cauți un nume exact ca pe pagina publică, apoi schimbi masa și salvezi doar când confirmi.</p>
+
+                            <div class="search-box organizer-search-box">
+                                <input
+                                    type="text"
+                                    id="guestSearchInput"
+                                    placeholder="Introdu numele invitatului..."
+                                    autocomplete="off"
+                                >
+                                <div class="search-actions">
+                                    <button type="button" id="searchGuestButton">Caută</button>
+                                    <button type="button" id="clearGuestFilterButton" class="secondary">Reset</button>
+                                </div>
+                                <div class="suggestions" id="guestSuggestions" aria-live="polite"></div>
+                            </div>
+
+                            <div class="result organizer-result" id="guestResult"></div>
+                        </div>
+                    </div>
+
+                    <div class="admin-tab-pane" data-admin-tab="add-guest">
+                        <div class="section-block">
+                            <h2 class="section-title">Adaugă invitat</h2>
+                            <p class="section-text">Introdu numele și masa. Invitatul va apărea în căutare după salvare.</p>
+
+                            <form class="admin-form" id="addGuestForm">
+                                <input type="text" id="newGuestNameInput" placeholder="Nume invitat" autocomplete="off">
+                                <select id="newGuestTableSelect"></select>
+                                <button type="submit">Salvează invitat</button>
+                                <div class="admin-form__message" id="addGuestMessage" aria-live="polite"></div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="admin-tab-pane" data-admin-tab="tables">
+                        <div class="section-block">
+                            <h2 class="section-title">Adaugă masă</h2>
+                            <p class="section-text">Poți crea mese noi care vor apărea apoi în grila de administrare și în alegerile de masă.</p>
+
+                            <form class="admin-form" id="addTableForm">
+                                <input type="number" id="newTableNumberInput" placeholder="Număr masă" min="1" step="1">
+                                <input type="text" id="newTableLabelInput" placeholder="Etichetă zonă (opțional)">
+                                <button type="submit">Salvează masa</button>
+                                <div class="admin-form__message" id="addTableMessage" aria-live="polite"></div>
+                            </form>
+
+                            <div class="table-grid" id="tableGrid"></div>
+                            <div class="table-detail" id="tableDetail"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-link-row">
+                <a class="page-link" href="index.html">Înapoi la pagina publică</a>
+            </div>
         </div>
     </div>
 
+    <script src="guests-data.js"></script>
     <script src="data.js"></script>
     <script src="organizers.js"></script>
 </body>

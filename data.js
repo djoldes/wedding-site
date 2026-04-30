@@ -1,22 +1,42 @@
-// Lista publică de invitați cu masele lor
-const invitati = [
-    { nume: "Ion Popescu", masa: 1 },
-    { nume: "Maria Ionescu", masa: 1 },
-    { nume: "Ana Popescu", masa: 2 },
-    { nume: "George Cristal", masa: 2 },
-    { nume: "Elena Stoian", masa: 3 },
-    { nume: "Vlad Petrescu", masa: 3 },
-    { nume: "Cristina Munteanu", masa: 4 },
-    { nume: "Andrei Dobrescu", masa: 4 },
-    { nume: "Roxana Stanescu", masa: 5 },
-    { nume: "Mihai Georgescu", masa: 5 },
-    { nume: "Laura Dinescu", masa: 6 },
-    { nume: "Adrian Florian", masa: 6 },
-    { nume: "Simona Iancu", masa: 7 },
-    { nume: "Bogdan Rares", masa: 7 },
-    { nume: "Alina Cercel", masa: 8 },
-    { nume: "Radu Ungureanu", masa: 8 }
-];
+const weddingStorageKeys = {
+    guests: 'weddingGuestsData',
+    tableZones: 'weddingTableZonesData',
+    guestSeedVersion: 'weddingGuestSeedVersion'
+};
+
+function loadStoredJson(key, fallback) {
+    try {
+        const rawValue = localStorage.getItem(key);
+        if (!rawValue) {
+            return fallback;
+        }
+
+        return JSON.parse(rawValue);
+    } catch {
+        return fallback;
+    }
+}
+
+function deepClone(value) {
+    return JSON.parse(JSON.stringify(value));
+}
+
+function loadGuestsWithSeedVersion() {
+    const configuredSeedVersion = typeof guestSeedVersion === 'string' ? guestSeedVersion : 'v1';
+    const storedSeedVersion = localStorage.getItem(weddingStorageKeys.guestSeedVersion);
+    const storedGuests = loadStoredJson(weddingStorageKeys.guests, null);
+
+    if (!Array.isArray(storedGuests) || storedSeedVersion !== configuredSeedVersion) {
+        const seededGuests = deepClone(defaultInvitati);
+        localStorage.setItem(weddingStorageKeys.guests, JSON.stringify(seededGuests));
+        localStorage.setItem(weddingStorageKeys.guestSeedVersion, configuredSeedVersion);
+        return seededGuests;
+    }
+
+    return storedGuests;
+}
+
+const invitati = loadGuestsWithSeedVersion();
 
 const guestExperienceData = {
     timeline: [
@@ -48,14 +68,170 @@ const guestExperienceData = {
         { id: "D", label: "Zona Terrace", tables: [7, 8] }
     ],
     menu: [
-        { course: "Antreu", description: "Mix de brânzeturi și charcuterie" },
-        { course: "Aperitiv cald", description: "Ruladă de brânză în aluat flo" },
-        { course: "Ciorba", description: "Ciorba tradițională de burtă" },
-        { course: "Fel principal", description: "Meniu carnivore: cotlet cu garnitură" },
-        { course: "Sarmale", description: "Sarmale în caisă, sos tomat" },
-        { course: "Desert", description: "Tort asortat cu gheață" }
+        {
+        course: "Antreu",
+        description: `Salată de vinete cu roșii concassé
+Chifteluțe tradiționale
+Speck roll cu cremă fină de brânză, pesto de trufe și ceapă roșie murată
+Fingers de pui aromați
+Sferă cu telemea în crustă de fistic și merișoare
+Ou royal cu turmeric și pastă fină de ficăței
+Pan con tomate cu perle de mozzarella și pesto de busuioc
+Arancini cu pulled pork, ceapă verde și sos de ardei copt
+Mini blinis cu cremă de brânză cu chives și boia afumată
+Cartof fondant cu mousse de ardei copt, crispy de bacon și mărar`
+        },
+        {
+        course: "Aperitiv cald",
+        description: "Piept de pui marinat în iaurt grecesc, în crustă panko, rondele de cartofi copți cu gremolata și unt, sos Cheddar cu jambon afumat și jalapeño murați."
+        },
+        {
+        course: "Ciorbă",
+        description: "Ciorbă rădăuțeană de pui"
+        },
+        {
+        course: "Fel principal",
+        description: "Mușchiuleț de porc în crustă de cartofi gratinați cu parmezan, sos demi-glace cu muștar boabe, morcov glazurat și tartar de castraveți și gogoșari murați"
+        },
+        {
+        course: "Sarmale",
+        description: "Sărmăluțe cu mămăliguță"
+        },
+        {
+        course: "Desert",
+        description: "Tort asortat cu gheață"
+        }
     ]
 };
+
+function getTableNumbersFromGuests(guests) {
+    if (!Array.isArray(guests)) {
+        return [];
+    }
+
+    return [...new Set(
+        guests
+            .map(guest => Number(guest?.masa))
+            .filter(tableNumber => Number.isInteger(tableNumber) && tableNumber > 0)
+    )].sort((a, b) => a - b);
+}
+
+function normalizeTableZones(rawZones) {
+    const zones = Array.isArray(rawZones) ? deepClone(rawZones) : [];
+    const normalized = [];
+
+    zones.forEach((zone, index) => {
+        const tables = Array.isArray(zone?.tables)
+            ? [...new Set(
+                zone.tables
+                    .map(tableNumber => Number(tableNumber))
+                    .filter(tableNumber => Number.isInteger(tableNumber) && tableNumber > 0)
+            )].sort((a, b) => a - b)
+            : [];
+
+        if (!tables.length) {
+            return;
+        }
+
+        normalized.push({
+            id: zone?.id || `zone-${index + 1}`,
+            label: zone?.label || `Mese ${tables[0]}-${tables[tables.length - 1]}`,
+            tables
+        });
+    });
+
+    return normalized;
+}
+
+function buildAutoZonesFromTables(tableNumbers, existingZones) {
+    const sortedTables = [...new Set(tableNumbers)].sort((a, b) => a - b);
+    if (!sortedTables.length) {
+        return [];
+    }
+
+    const existingIds = new Set(existingZones.map(zone => String(zone.id || '')));
+    const maxExistingIndex = existingZones.reduce((maxIndex, zone) => {
+        const match = String(zone.id || '').match(/^auto-zone-(\d+)$/);
+        if (!match) {
+            return maxIndex;
+        }
+        return Math.max(maxIndex, Number(match[1]));
+    }, 0);
+
+    const autoZones = [];
+    const chunkSize = 4;
+    let nextIndex = maxExistingIndex + 1;
+
+    for (let index = 0; index < sortedTables.length; index += chunkSize) {
+        const chunk = sortedTables.slice(index, index + chunkSize);
+        let zoneId = `auto-zone-${nextIndex}`;
+
+        while (existingIds.has(zoneId)) {
+            nextIndex += 1;
+            zoneId = `auto-zone-${nextIndex}`;
+        }
+
+        existingIds.add(zoneId);
+
+        const label = chunk.length === 1
+            ? `Zona Extinsa - Masa ${chunk[0]}`
+            : `Zona Extinsa ${chunk[0]}-${chunk[chunk.length - 1]}`;
+
+        autoZones.push({
+            id: zoneId,
+            label,
+            tables: chunk
+        });
+
+        nextIndex += 1;
+    }
+
+    return autoZones;
+}
+
+function isAutoGeneratedZone(zone) {
+    const zoneId = String(zone?.id || '');
+    return /^auto-/.test(zoneId);
+}
+
+function syncTableZonesWithGuests(tableZones, guests) {
+    const zones = normalizeTableZones(tableZones);
+    const guestTables = getTableNumbersFromGuests(guests);
+    const manualZones = zones.filter(zone => !isAutoGeneratedZone(zone));
+    const configuredTables = new Set(manualZones.flatMap(zone => zone.tables));
+
+    const missingTables = guestTables.filter(tableNumber => !configuredTables.has(tableNumber));
+
+    // Rebuild auto zones at every sync so older formats (auto-<masa>) are migrated to grouped zones.
+    const rebuiltZones = [...manualZones];
+
+    rebuiltZones.push(...buildAutoZonesFromTables(missingTables, rebuiltZones));
+
+    return rebuiltZones.sort((a, b) => a.tables[0] - b.tables[0]);
+}
+
+const defaultTableZones = deepClone(guestExperienceData.tableZones);
+const storedTableZones = loadStoredJson(weddingStorageKeys.tableZones, null);
+const baseTableZones = Array.isArray(storedTableZones) ? storedTableZones : deepClone(defaultTableZones);
+
+guestExperienceData.tableZones = syncTableZonesWithGuests(baseTableZones, invitati);
+saveWeddingTableZones(guestExperienceData.tableZones);
+
+function saveWeddingGuests(guests) {
+    localStorage.setItem(weddingStorageKeys.guests, JSON.stringify(guests));
+}
+
+function saveWeddingTableZones(tableZones) {
+    localStorage.setItem(weddingStorageKeys.tableZones, JSON.stringify(tableZones));
+}
+
+function getWeddingGuests() {
+    return invitati;
+}
+
+function getWeddingTableZones() {
+    return guestExperienceData.tableZones;
+}
 
 const organizerData = {
     title: "Panou organizatori",

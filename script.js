@@ -598,6 +598,10 @@ function setupMainTabsInteraction() {
 
             this.classList.add('is-active');
             document.querySelector(`[data-tab="${tabName}"].main-tab-pane`)?.classList.add('is-active');
+
+            if (tabName === 'gallery' && typeof window.ensureGalleryInitialized === 'function') {
+                window.ensureGalleryInitialized();
+            }
         });
     });
 }
